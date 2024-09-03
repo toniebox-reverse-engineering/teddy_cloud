@@ -16,7 +16,7 @@ RUN make zip NO_SANITIZERS=1
 
 # Use Alpine Linux as base image for the final image
 FROM alpine:latest
-EXPOSE 80 443 8443
+EXPOSE 80 443
 
 # Install necessary runtime dependencies
 RUN apk --no-cache add ffmpeg curl ca-certificates bash
