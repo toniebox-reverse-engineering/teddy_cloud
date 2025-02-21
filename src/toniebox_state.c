@@ -39,6 +39,22 @@ void tbs_tag_placed(client_ctx_t *client_ctx, uint64_t uid, bool valid)
     mqtt_sendBoxEvent(!valid ? "TagValid" : "TagInvalid", "", client_ctx);
 }
 
+void tbs_tag_unplaced(client_ctx_t *client_ctx, uint64_t uid, bool valid)
+{
+    client_ctx->state->tag.uid = uid;
+    client_ctx->state->tag.valid = valid;
+    if (valid)
+    {
+        setLastUid(client_ctx->state->tag.uid, client_ctx->settingsNoOverlay);
+    }
+
+    char cuid[16 + 2];
+    osSprintf((char *)cuid, "-%016" PRIX64 "", (int64_t)uid);
+
+    mqtt_sendBoxEvent(valid ? "TagValid" : "TagInvalid", cuid, client_ctx);
+    mqtt_sendBoxEvent(!valid ? "TagValid" : "TagInvalid", "-", client_ctx);
+}
+
 void tbs_knock(client_ctx_t *client_ctx, bool forward)
 {
     sse_sendEvent("knock", forward ? "forward" : "backward", true);
@@ -72,7 +88,6 @@ void tbs_playback(client_ctx_t *client_ctx, toniebox_state_playback_t playback)
 
         sse_sendEvent("playback", "stopped", true);
         mqtt_sendBoxEvent("Playback", "OFF", client_ctx);
-        mqtt_sendBoxEvent("TagValid", "", client_ctx);
         mqtt_sendBoxEvent("ContentAudioId", "", client_ctx);
         mqtt_sendBoxEvent("ContentTitle", "", client_ctx);
         char *url = custom_asprintf("%s/img_empty.png", settings_get_string("core.host_url"));
@@ -82,7 +97,6 @@ void tbs_playback(client_ctx_t *client_ctx, toniebox_state_playback_t playback)
     default:
         break;
     }
-    mqtt_sendBoxEvent("TagInvalid", "", client_ctx);
 }
 
 void tbs_playback_file(client_ctx_t *client_ctx, char *filepath)

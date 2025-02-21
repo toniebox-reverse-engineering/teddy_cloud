@@ -13,6 +13,7 @@ toniebox_state_t *get_toniebox_state();
 toniebox_state_t *get_toniebox_state_id(uint8_t id);
 
 void tbs_tag_placed(client_ctx_t *client_ctx, uint64_t uid, bool valid);
+void tbs_tag_unplaced(client_ctx_t *client_ctx, uint64_t uid, bool valid);
 void tbs_tag_removed(client_ctx_t *client_ctx);
 void tbs_knock(client_ctx_t *client_ctx, bool forward);
 void tbs_tilt(client_ctx_t *client_ctx, bool forward);
