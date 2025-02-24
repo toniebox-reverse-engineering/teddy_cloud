@@ -929,10 +929,7 @@ error_t handleCloudFreshnessCheck(HttpConnection *connection, const char_t *uri,
                 }
             }
             tonie_freshness_check_request__free_unpacked(freshReq, NULL);
-            if (client_ctx->settings->toniebox.overrideCloud)
-            {
-                setTonieboxSettings(&freshResp, client_ctx->settings);
-            }
+            setTonieboxSettings(&freshResp, client_ctx->settings);
 
             size_t dataLen = tonie_freshness_check_response__get_packed_size(&freshResp);
             tonie_freshness_check_response__pack(&freshResp, (uint8_t *)data);

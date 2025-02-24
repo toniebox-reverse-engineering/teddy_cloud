@@ -113,7 +113,15 @@ error_t handleSecMitCrawler(HttpConnection *connection, const char_t *uri, const
     {
         return NO_ERROR;
     }
-    char *crawlers[] = {"Googlebot", "bingbot", "yandexbot", "Baiduspider", "Sogou", "Exabot", "ia_archiver", "facebookexternalhit", "Twitterbot", "LinkedInBot", "Embedly", "Quora Link Preview", "showyoubot", "outbrain", "pinterest", "developers.google.com"};
+    char *crawlers[] = {
+        "Googlebot", "bingbot", "yandexbot", "Baiduspider", "Sogou",
+        "Exabot", "ia_archiver", "facebookexternalhit", "Twitterbot",
+        "LinkedInBot", "Embedly", "Quora Link Preview", "showyoubot",
+        "outbrain", "pinterest", "developers.google.com",
+        "Shodan", "Censys", "ZoomEye", "Masscan", "Nmap", "Nuclei", "Nessus",
+        "Acunetix", "Qualys", "Nikto", "Arachni", "Burp Suite", "Netsparker",
+        "w3af", "Zmap", "Digincore", "Netcraft", "SecurityTrails"};
+
     size_t numCrawlers = sizeof(crawlers) / sizeof(crawlers[0]);
     for (size_t i = 0; i < numCrawlers; i++)
     {

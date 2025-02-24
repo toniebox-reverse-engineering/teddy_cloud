@@ -69,11 +69,23 @@ CFLAGS_VERSION+=-DBUILD_PRIuTIME_LLU=1
 endif
 endif
 
-#ifeq ($(build_os_id),"ubuntu")
-#ifeq ($(build_arch_bits),32)
-#CFLAGS_VERSION+=-DBUILD_PRIuTIME_LLU=1
-#endif
-#endif
+ifeq ($(build_os_id),"ubuntu")
+ifeq ($(build_arch_bits),32)
+CFLAGS_VERSION+=-DBUILD_PRIuTIME_LLU=1
+endif
+endif
+
+ifeq ($(build_os_id),"ubuntu")
+ifeq ($(build_arch),"aarch64")
+ifeq ($(build_arch_bits),64)
+# Workaround AddressSanitizer: CHECK failed: sanitizer_allocator_primary64.h:131 "((kSpaceBeg)) == ((address_range.Init(TotalSpaceSize, PrimaryAllocatorName, kSpaceBeg)))" (0x500000000000, 0xfffffffffffffff4) (tid=8)
+# LLM: Ubuntu's Linux kernel version 6.5.0-25 increased the number of random bits used for ASLR from 28 to 32 on 64-bit systems7.
+# The AddressSanitizer library hasn't been updated to accommodate this change in the ASLR configuration7.
+# This mismatch causes a CHECK failure in the sanitizer_allocator_primary64.h file, specifically at line 131.
+CFLAGS_VERSION+=-DSANITIZER_CAN_USE_ALLOCATOR64=0
+endif
+endif
+endif
 
 build_gitTagPrefix:=$(firstword $(subst _, ,$(build_gitTag)))
 ifeq ($(build_gitTagPrefix),tc)

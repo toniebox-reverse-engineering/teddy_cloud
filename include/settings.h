@@ -133,6 +133,9 @@ typedef struct
     bool slap_enabled;
     bool slap_back_left;
     uint32_t led;
+    bool overrideFields;
+    uint32_t field2;
+    uint32_t field6;
 } settings_toniebox_t;
 
 typedef struct
@@ -293,6 +296,8 @@ typedef struct
 
     bool tonies_json_auto_update;
     bool full_taf_validation;
+    bool tap_taf_validation;
+    bool track_pos_taf_validation;
 } settings_core_t;
 
 typedef struct

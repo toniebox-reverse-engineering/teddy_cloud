@@ -30,9 +30,9 @@ error_t parsePostData(HttpConnection *connection, char_t *post_data, size_t buff
     error_t error = NO_ERROR;
     osMemset(post_data, 0, buffer_size);
     size_t size;
-    if (buffer_size <= connection->request.byteCount)
+    if (buffer_size > 0 && buffer_size <= connection->request.byteCount)
     {
-        TRACE_ERROR("Body size  %zu bigger than buffer size %i bytes\r\n", connection->request.byteCount, BODY_BUFFER_SIZE);
+        TRACE_ERROR("Body size %" PRIuSIZE " bigger than buffer size %" PRIuSIZE " bytes\r\n", connection->request.byteCount, buffer_size);
         return ERROR_BUFFER_OVERFLOW;
     }
     error = httpReceive(connection, post_data, buffer_size, &size, 0x00);
@@ -1925,7 +1925,7 @@ error_t handleApiEncodeFile(HttpConnection *connection, const char_t *uri, const
     }
 
     char_t post_data[BODY_BUFFER_SIZE];
-    error_t error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    error_t error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         TRACE_ERROR("parsePostData failed with error %s\r\n", error2text(error));
@@ -2269,8 +2269,8 @@ error_t handleApiFileMove(HttpConnection *connection, const char_t *uri, const c
         return ERROR_FAILURE;
     }
 
-    char_t post_data[BODY_BUFFER_SIZE];
-    error_t error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    char_t post_data[POST_BUFFER_SIZE];
+    error_t error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         return error;
@@ -2610,8 +2610,8 @@ error_t handleApiContentJsonSet(HttpConnection *connection, const char_t *uri, c
         return error;
     }
 
-    char_t post_data[BODY_BUFFER_SIZE];
-    error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    char_t post_data[POST_BUFFER_SIZE];
+    error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         osFreeMem(contentPath);
@@ -2977,8 +2977,8 @@ error_t handleApiTagIndex(HttpConnection *connection, const char_t *uri, const c
 
 error_t handleApiAuthLogin(HttpConnection *connection, const char_t *uri, const char_t *queryString, client_ctx_t *client_ctx)
 {
-    char_t post_data[BODY_BUFFER_SIZE];
-    error_t error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    char_t post_data[POST_BUFFER_SIZE];
+    error_t error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         return error;
@@ -3016,8 +3016,8 @@ error_t handleApiAuthLogout(HttpConnection *connection, const char_t *uri, const
 }
 error_t handleApiAuthRefreshToken(HttpConnection *connection, const char_t *uri, const char_t *queryString, client_ctx_t *client_ctx)
 {
-    char_t post_data[BODY_BUFFER_SIZE];
-    error_t error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    char_t post_data[POST_BUFFER_SIZE];
+    error_t error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         return error;
@@ -3049,9 +3049,9 @@ error_t handleApiMigrateContent2Lib(HttpConnection *connection, const char_t *ur
         return ERROR_FAILURE;
     }
 
-    char_t post_data[BODY_BUFFER_SIZE];
+    char_t post_data[POST_BUFFER_SIZE];
     error_t error = ERROR_FILE_NOT_FOUND;
-    error = parsePostData(connection, post_data, BODY_BUFFER_SIZE);
+    error = parsePostData(connection, post_data, POST_BUFFER_SIZE);
     if (error != NO_ERROR)
     {
         return error;

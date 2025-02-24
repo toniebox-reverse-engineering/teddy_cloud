@@ -223,4 +223,6 @@ typedef struct
 #define HTTP_SERVER_TIMEOUT (1 * 60000)
 #define HTTP_SERVER_BUFFER_SIZE 1024 * 32
 
+#define HTTP_SERVER_MAX_REQUESTS (UINT32_MAX - 1)
+
 #endif

@@ -211,12 +211,12 @@
         },
         "date": "Fecha",
         "delete": "Eliminar",
-        "deleteMultiple": "Eliminar filas seleccionadas",
+        "deleteMultiple": "{{selectedRowCount}} filas seleccionadas para eliminar",
         "encodeFiles": {
             "addFiles": "Agregar archivos",
             "cancel": "Cancelar",
             "encode": "Codificar",
-            "encodeFiles": "Codificar los archivos seleccionados en un archivo taf. Solo se considerarán los siguientes tipos de archivos: ",
+            "encodeFiles": "{{selectedRowCount}} archivos seleccionados para codificar en un archivo taf. Solo se considerarán los siguientes tipos de archivos: ",
             "encoding": "Codificación",
             "encodingFailed": "¡Falló la codificación!",
             "encodingFailedDetails": "Error al codificar los archivos \"{{file}}\": ",
@@ -358,7 +358,7 @@
             "move": "Mover",
             "moveTo": "a"
         },
-        "moveMultiple": "Mover archivos seleccionados (¡solo archivos, se omiten las carpetas!)",
+        "moveMultiple": "{{selectedRowCount}} archivos seleccionados para mover (¡solo archivos, se omiten las carpetas!)",
         "name": "Nombre",
         "playFile": "Reproducir",
         "rename": "Renombrar",
@@ -1441,6 +1441,7 @@
             "title": "Sonidos del sistema"
         },
         "tafHeaderOf": "TAF-Header de ",
+        "tafHeaderInvalid": "TAF no válido",
         "tap": {
             "navigationTitle": "WIP: Listas de reproducción de audio",
             "title": "WIP: Listas de reproducción de audio de Tonie"

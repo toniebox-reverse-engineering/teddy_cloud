@@ -1,4 +1,4 @@
-FROM debian:latest as buildenv
+FROM debian:latest AS buildenv
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc protobuf-c-compiler build-essential git zip curl

@@ -1,5 +1,5 @@
 # Use Alpine Linux as base image
-FROM alpine:latest as buildenv
+FROM alpine:latest AS buildenv
 
 # Install necessary dependencies
 RUN apk --no-cache add gcc protobuf-c-dev build-base git zip curl
