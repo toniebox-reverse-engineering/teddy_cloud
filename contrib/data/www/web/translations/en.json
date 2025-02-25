@@ -211,12 +211,12 @@
         },
         "date": "Date",
         "delete": "Delete",
-        "deleteMultiple": "Delete selected rows",
+        "deleteMultiple": "Delete {{selectedRowCount}} selected rows",
         "encodeFiles": {
             "addFiles": "Add files",
             "cancel": "Cancel",
             "encode": "Encode",
-            "encodeFiles": "Encode selected files into a taf file. Only the following file types will be considered: ",
+            "encodeFiles": "Encode {{selectedRowCount}} selected files into a taf file. Only the following file types will be considered: ",
             "encoding": "Encoding",
             "encodingFailed": "Encoding failed!",
             "encodingFailedDetails": "Encoded files \"{{file}}\" failed: ",
@@ -358,7 +358,7 @@
             "move": "Move",
             "moveTo": "to"
         },
-        "moveMultiple": "Move selected files (files only, folders are skipped!)",
+        "moveMultiple": "Move {{selectedRowCount}} selected files (files only, folders are skipped!)",
         "name": "Name",
         "playFile": "Play",
         "rename": "Rename",
@@ -1441,6 +1441,7 @@
             "title": "System Sounds"
         },
         "tafHeaderOf": "TAF-Header of ",
+        "tafHeaderInvalid": "Invalid TAF",
         "tap": {
             "navigationTitle": "WIP: Audio Playlists",
             "title": "WIP: Tonie Audio Playlists"

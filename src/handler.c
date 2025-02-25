@@ -324,10 +324,11 @@ void cbrCloudBodyPassthrough(void *src_ctx, HttpClientContext *cloud_ctx, const 
         httpSend(ctx->connection, payload, length, HTTP_FLAG_DELAY);
         break;
     case V1_FRESHNESS_CHECK:
-        if (ctx->client_ctx->settings->toniebox.overrideCloud && length > 0 && fillCbrBodyCache(ctx, httpClientContext, payload, length))
+        if (length > 0 && fillCbrBodyCache(ctx, httpClientContext, payload, length))
         {
             TonieFreshnessCheckResponse *freshResp = (TonieFreshnessCheckResponse *)ctx->customData;
             TonieFreshnessCheckResponse *freshRespCloud = tonie_freshness_check_response__unpack(NULL, ctx->bufferLen, (const uint8_t *)ctx->buffer);
+
             if (ctx->client_ctx->settings->toniebox.overrideCloud)
             {
                 setTonieboxSettings(freshResp, ctx->client_ctx->settings);
@@ -341,6 +342,23 @@ void cbrCloudBodyPassthrough(void *src_ctx, HttpClientContext *cloud_ctx, const 
                 freshResp->led = freshRespCloud->led;
                 freshResp->field2 = freshRespCloud->field2;
                 freshResp->field6 = freshRespCloud->field6;
+            }
+            TRACE_INFO("FreshnessCheck data from cloud / to box\r\n");
+            TRACE_INFO(" max_vol_spk: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->max_vol_spk, freshResp->max_vol_spk);
+            TRACE_INFO(" max_vol_hdp: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->max_vol_hdp, freshResp->max_vol_hdp);
+            TRACE_INFO(" slap_en: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->slap_en, freshResp->slap_en);
+            TRACE_INFO(" slap_dir: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->slap_dir, freshResp->slap_dir);
+            TRACE_INFO(" led: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->led, freshResp->led);
+            TRACE_INFO(" field2: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->field2, freshResp->field2);
+            TRACE_INFO(" field6: %" PRIu32 " / %" PRIu32 "\r\n", freshRespCloud->field6, freshResp->field6);
+
+            if (freshRespCloud->field2 != 7)
+            {
+                TRACE_WARNING("Field 2 has not the expected value 7. Value=%" PRIu32 "\r\n", freshRespCloud->field2);
+            }
+            if (freshRespCloud->field6 != 1)
+            {
+                TRACE_WARNING("Field 6 has not the expected value 1. Value=%" PRIu32 "\r\n", freshRespCloud->field6);
             }
 
             for (size_t i = 0; i < freshRespCloud->n_tonie_marked; i++)
@@ -446,6 +464,10 @@ void setTonieboxSettings(TonieFreshnessCheckResponse *freshResp, settings_t *set
     freshResp->slap_en = settings->toniebox.slap_enabled;
     freshResp->slap_dir = settings->toniebox.slap_back_left;
     freshResp->led = settings->toniebox.led;
+    if (settings->toniebox.overrideFields) {
+        freshResp->field2 = settings->toniebox.field2;
+        freshResp->field6 = settings->toniebox.field6;
+    }
 }
 
 bool_t isValidTaf(const char *contentPath, bool checkHashAndSize)
@@ -586,9 +608,12 @@ void readTrackPositions(tonie_info_t *tonieInfo, FsFile *file)
             osFreeMem(trackPos->pos);
             trackPos->pos = NULL;
 
-            if (!isValidTaf(tonieInfo->contentPath, true))
+            if (get_settings()->core.track_pos_taf_validation)
             {
-                TRACE_ERROR("SHA1 not valid or length different for TAF %s\r\n", tonieInfo->contentPath);
+                if (!isValidTaf(tonieInfo->contentPath, true))
+                {
+                    TRACE_ERROR("SHA1 not valid or length different for TAF %s\r\n", tonieInfo->contentPath);
+                }
             }
         }
     }

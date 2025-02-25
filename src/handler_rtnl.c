@@ -460,6 +460,21 @@ void rtnlEvent(HttpConnection *connection, TonieRtnlRPC *rpc, client_ctx_t *clie
                 // TODO
                 settings_set_string_id("internal.toniebox_firmware.rtnlRegion", (const char *)rpc->log2->field6.data, client_ctx->settings->internal.overlayNumber);
             }
+            else if (rpc->log2->function == RTNL2_FUNC_NETWORK_DOMAIN)
+            {
+                // Raw2 | #142 Uptime: 13973 Func:  6-1009 Payload: '70726F642E726576766F7800C0000000A80000007B0000008D000000' ASCII: 'prod.revvox.........{.......'
+                settings_set_string_id("internal.rtnl.prodDomain", (const char *)rpc->log2->field6.data, client_ctx->settings->internal.overlayNumber);
+                settings_set_string("internal.rtnl.prodDomain", (const char *)rpc->log2->field6.data);
+            }
+        }
+        else if (rpc->log2->function_group == RTNL2_FUGR_NETWORK_TCP)
+        {
+            if (rpc->log2->function == RTNL2_FUNC_NETWORK_DOMAIN)
+            {
+                // Raw2 | #171 Uptime: 19080 Func: 37-1009 Payload: '72746E6C2E726576766F7800C0000000A80000007B0000008D000000' ASCII: 'rtnl.revvox.........{.......'
+                settings_set_string_id("internal.rtnl.rtnlDomain", (const char *)rpc->log2->field6.data, client_ctx->settings->internal.overlayNumber);
+                settings_set_string("internal.rtnl.rtnlDomain", (const char *)rpc->log2->field6.data);
+            }
         }
         else if (rpc->log2->function_group == RTNL2_FUGR_AUDIO_B)
         {

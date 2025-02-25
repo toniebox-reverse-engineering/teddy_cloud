@@ -7,9 +7,17 @@ bool isSecMitIncident(HttpConnection *connection)
     settings_t *settings = get_settings();
 
     bool isSecurityIncident = false;
-    if (settings->security_mit.httpsOnly && !connection->settings->isHttps)
+
+    if (!settings->security_mit.hardLock && settings->security_mit.httpsOnly && !connection->settings->isHttps)
     {
         return false;
+    }
+
+    if (settings->security_mit.hardLock && !settings->internal.config_changed)
+    {
+        isSecurityIncident = true;
+        TRACE_WARNING("Hard security lock detected.\r\n");
+        TRACE_WARNING("Somebody locked it manually to protect you, as you keep ignoring the warnings!\r\n");
     }
     if (settings->security_mit.onBlacklistDomain && (settings->internal.security_mit.blacklisted_domain_access > 0))
     {
@@ -35,7 +43,8 @@ bool isSecMitIncident(HttpConnection *connection)
     if (isSecurityIncident)
     {
         TRACE_WARNING("Security incident detected, there is information, that you are hosting teddyCloud on a public instance\r\n");
-        TRACE_WARNING("Anybody could extract your box certificates and tonies. This could render your tonies and/or box useless\r\n");
+        TRACE_WARNING("Please protect the webinterface on ports 80 / 443.\r\n");
+        TRACE_WARNING("Otherwise, anybody could extract your box certificates and tonies. This could render your tonies and/or box useless\r\n");
         TRACE_WARNING("Feel free to ask for help on https://forum.revvox.de or https://t.me/toniebox_reverse_engineering\r\n");
         settings->internal.security_mit.incident = true;
     }
@@ -113,7 +122,15 @@ error_t handleSecMitCrawler(HttpConnection *connection, const char_t *uri, const
     {
         return NO_ERROR;
     }
-    char *crawlers[] = {"Googlebot", "bingbot", "yandexbot", "Baiduspider", "Sogou", "Exabot", "ia_archiver", "facebookexternalhit", "Twitterbot", "LinkedInBot", "Embedly", "Quora Link Preview", "showyoubot", "outbrain", "pinterest", "developers.google.com"};
+    char *crawlers[] = {
+        "Googlebot", "bingbot", "yandexbot", "Baiduspider", "Sogou",
+        "Exabot", "ia_archiver", "facebookexternalhit", "Twitterbot",
+        "LinkedInBot", "Embedly", "Quora Link Preview", "showyoubot",
+        "outbrain", "pinterest", "developers.google.com",
+        "Shodan", "Censys", "ZoomEye", "Masscan", "Nmap", "Nuclei", "Nessus",
+        "Acunetix", "Qualys", "Nikto", "Arachni", "Burp Suite", "Netsparker",
+        "w3af", "Zmap", "Digincore", "Netcraft", "SecurityTrails"};
+
     size_t numCrawlers = sizeof(crawlers) / sizeof(crawlers[0]);
     for (size_t i = 0; i < numCrawlers; i++)
     {

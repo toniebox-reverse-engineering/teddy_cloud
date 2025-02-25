@@ -20,6 +20,8 @@ typedef struct
     FsFile *file;
 } file_save_ctx;
 
+#define POST_BUFFER_SIZE 1024 * 32
+
 void stats_update(const char *item, int count);
 
 error_t handleApiUploadCert(HttpConnection *connection, const char_t *uri, const char_t *queryString, client_ctx_t *client_ctx);

@@ -117,6 +117,8 @@ static void option_map_init(uint8_t settingsId)
     OPTION_UNSIGNED("core.settings_level", &settings->core.settings_level, 1, 1, 3, "Settings level", "1: Basic, 2: Detail, 3: Expert", LEVEL_BASIC)
     OPTION_BOOL("core.tonies_json_auto_update", &settings->core.tonies_json_auto_update, TRUE, "Auto-Update tonies.json", "Auto-Update tonies.json for Tonies information and images.", LEVEL_DETAIL)
     OPTION_BOOL("core.full_taf_validation", &settings->core.full_taf_validation, FALSE, "Full TAF validation", "Validate TAFs by checking the audio length and the SHA1 hash. (may be slow, as file needs to be fully read!)", LEVEL_EXPERT)
+    OPTION_BOOL("core.tap_taf_validation", &settings->core.tap_taf_validation, FALSE, "TAP TAF validation", "Validate TAFs of TAPs by checking the audio length and the SHA1 hash. (may be slow, as file needs to be fully read!)", LEVEL_EXPERT)
+    OPTION_BOOL("core.track_pos_taf_validation", &settings->core.track_pos_taf_validation, TRUE, "Track position error TAF validation", "Validate TAFs when track position error occurs by checking the audio length and the SHA1 hash. (may be slow, as file needs to be fully read!)", LEVEL_DETAIL)
 
     OPTION_TREE_DESC("security_mit", "Security mitigation", LEVEL_EXPERT)
     OPTION_BOOL("security_mit.warnAccess", &settings->security_mit.warnAccess, TRUE, "Warning on unwanted access", "If teddyCloud detects unusal access, warn on frontend until restart. (See on*)", LEVEL_EXPERT)
@@ -126,6 +128,7 @@ static void option_map_init(uint8_t settingsId)
     OPTION_BOOL("security_mit.onCrawler", &settings->security_mit.onCrawler, TRUE, "Detect crawlers", "Lock/Warn, if crawler is detected (User-Agent).", LEVEL_EXPERT)
     // OPTION_BOOL("security_mit.onExternal", &settings->security_mit.onExternal, TRUE, "Detect external access", "Lock/Warn, if external access is detected.", LEVEL_EXPERT)
     OPTION_BOOL("security_mit.onRobotsTxt", &settings->security_mit.onRobotsTxt, TRUE, "Detect robots.txt", "Lock/Warn, if robots.txt is accessed.", LEVEL_EXPERT)
+    OPTION_BOOL("security_mit.hardLock", &settings->security_mit.hardLock, FALSE, "Disable teddyCloud", "Disable teddyCloud due to ignored security warnings.", LEVEL_SECRET)
 
     OPTION_TREE_DESC("internal", "Internal", LEVEL_NONE)
     OPTION_INTERNAL_STRING("internal.server.ca", &settings->internal.server.ca, "", "CA certificate data", LEVEL_SECRET)
@@ -164,6 +167,8 @@ static void option_map_init(uint8_t settingsId)
     OPTION_INTERNAL_UNSIGNED("internal.rtnl.lastEarpress", &settings->internal.rtnl.lastEarpress, 0, 0, UINT64_MAX, "Timestamp of the last pressed ear", LEVEL_NONE)
     OPTION_INTERNAL_BOOL("internal.rtnl.wasDoubleEarpress", &settings->internal.rtnl.wasDoubleEarpress, FALSE, "Was double Earpress?", LEVEL_NONE)
     OPTION_INTERNAL_UNSIGNED("internal.rtnl.multipressTime", &settings->internal.rtnl.multipressTime, 300, 0, UINT16_MAX, "Multipress time", LEVEL_NONE)
+    OPTION_INTERNAL_STRING("internal.rtnl.prodDomain", &settings->internal.rtnl.prodDomain, "", "prod domain sent by the box", LEVEL_NONE)
+    OPTION_INTERNAL_STRING("internal.rtnl.rtnlDomain", &settings->internal.rtnl.rtnlDomain, "", "rtnl domain sent by the box", LEVEL_NONE)
 
     OPTION_INTERNAL_STRING("internal.version.id", &settings->internal.version.id, "", "Version id", LEVEL_NONE)
     OPTION_INTERNAL_STRING("internal.version.git_sha_short", &settings->internal.version.git_sha_short, "", "Short Git SHA-1 hash of the build version", LEVEL_NONE)
@@ -256,6 +261,9 @@ static void option_map_init(uint8_t settingsId)
     OPTION_BOOL("toniebox.slap_enabled", &settings->toniebox.slap_enabled, TRUE, "Slap to skip", "Enable track skip via slapping gesture", LEVEL_BASIC)
     OPTION_BOOL("toniebox.slap_back_left", &settings->toniebox.slap_back_left, FALSE, "Slap direction", "Determine slap direction for skipping track: False for left-backward, True for left-forward", LEVEL_BASIC)
     OPTION_UNSIGNED("toniebox.led", &settings->toniebox.led, 0, 0, 2, "LED brightness", "0=on, 1=off, 2=dimmed", LEVEL_BASIC)
+    OPTION_BOOL("toniebox.overrideFields", &settings->toniebox.overrideFields, FALSE, "Override unknown fields", "Override unknown fields 2 + 6", LEVEL_EXPERT)
+    OPTION_UNSIGNED("toniebox.field2", &settings->toniebox.field2, 7, 0, UINT32_MAX, "Field 2", "Unknown Toniebox setting, default 7", LEVEL_EXPERT)
+    OPTION_UNSIGNED("toniebox.field6", &settings->toniebox.field6, 1, 0, UINT32_MAX, "Field 6", "Unknown Toniebox setting, default 1", LEVEL_EXPERT)
 
     OPTION_TREE_DESC("rtnl", "RTNL log", LEVEL_EXPERT)
     OPTION_BOOL("rtnl.logRaw", &settings->rtnl.logRaw, FALSE, "Log RTNL (bin)", "Enable logging for raw RTNL data", LEVEL_EXPERT)
@@ -499,16 +507,16 @@ void settings_resolve_dir(char **resolvedPath, char *path, char *basePath)
 
 static void settings_generate_internal_dirs(settings_t *settings)
 {
-    free(settings->internal.basedirfull);
-    free(settings->internal.certdirfull);
-    free(settings->internal.configdirfull);
-    free(settings->internal.contentdirrel);
-    free(settings->internal.contentdirfull);
-    free(settings->internal.librarydirfull);
-    free(settings->internal.datadirfull);
-    free(settings->internal.wwwdirfull);
-    free(settings->internal.firmwaredirfull);
-    free(settings->internal.cachedirfull);
+    osFreeMem(settings->internal.basedirfull);
+    osFreeMem(settings->internal.certdirfull);
+    osFreeMem(settings->internal.configdirfull);
+    osFreeMem(settings->internal.contentdirrel);
+    osFreeMem(settings->internal.contentdirfull);
+    osFreeMem(settings->internal.librarydirfull);
+    osFreeMem(settings->internal.datadirfull);
+    osFreeMem(settings->internal.wwwdirfull);
+    osFreeMem(settings->internal.firmwaredirfull);
+    osFreeMem(settings->internal.cachedirfull);
 
     settings->internal.basedirfull = osAllocMem(256);
     settings->internal.certdirfull = osAllocMem(256);
@@ -539,7 +547,7 @@ static void settings_generate_internal_dirs(settings_t *settings)
 
     settings_resolve_dir(&settings->internal.librarydirfull, settings->core.librarydir, settings->internal.datadirfull);
 
-    free(tmpPath);
+    osFreeMem(tmpPath);
 }
 
 static void settings_changed()
@@ -602,6 +610,7 @@ static void settings_deinit_ovl(uint8_t overlayNumber)
             if (*((char **)opt->ptr))
             {
                 osFreeMem(*((char **)opt->ptr));
+                *((char **)opt->ptr) = NULL;
             }
             break;
         case TYPE_U64_ARRAY:
@@ -963,7 +972,7 @@ static error_t settings_load_ovl(bool overlay)
                             TRACE_DEBUG("%s=%f\r\n", opt->option_name, *((float *)opt->ptr));
                             break;
                         case TYPE_STRING:
-                            free(*((char **)opt->ptr));
+                            osFreeMem(*((char **)opt->ptr));
                             *((char **)opt->ptr) = strdup(value_str);
                             TRACE_DEBUG("%s=%s\r\n", opt->option_name, *((char **)opt->ptr));
                             break;
@@ -1331,7 +1340,6 @@ bool settings_set_float_ovl(const char *item, float value, const char *overlay_n
 }
 bool settings_set_float_id(const char *item, float value, uint8_t settingsId)
 {
-
     if (!item)
     {
         return false;
@@ -1423,7 +1431,7 @@ bool settings_set_string_id(const char *item, const char *value, uint8_t setting
 
     if (old_ptr)
     {
-        free(old_ptr);
+        osFreeMem(old_ptr);
     }
 
     return true;
